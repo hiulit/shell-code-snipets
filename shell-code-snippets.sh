@@ -48,3 +48,34 @@ function date_diff() {
 function round() {
     echo "$((($1 + $2 / 2) / $2))"
 }
+
+version="$(check_version)"
+now="$(date +%F\ %T)"
+offset="$(date +%::z)"
+offset="${offset#+}"
+offset_s="$(echo "$offset" | awk -F: '{print ($1*3600) + ($2*60) + $3}')"
+last_commit="$(get_last_commit)"
+diff_s="$(date_diff "$last_commit" "$now")"
+if (( "$diff_s" < 60 )); then
+    time_diff="$diff_s"
+    [[ "$time_diff" -eq 1 ]] && smh="second" || smh="seconds"
+elif (( "$diff_s" >= 60 && "$diff_s" < 3600 )); then
+    time_diff="$(round $diff_s 60)"
+    [[ "$time_diff" -eq 1 ]] && smh="minute" || smh="minutes"
+elif (( "diff_s" >= 3600 && "$diff_s" < 86400  )); then
+    time_diff="$(round $diff_s 3600)"
+    [[ "$time_diff" -eq 1 ]] && smh="hour" || smh="hours"
+elif (( "$diff_s" >= 86400 && "$diff_s" < 604800 )); then
+    time_diff="$(round $diff_s 86400)"
+    [[ "$time_diff" -eq 1 ]] && smh="day" || smh="days"
+elif (( "$diff_s" >= 604800 && "$diff_s" < 2629744 )); then
+    time_diff="$(round $diff_s 604800)"
+    [[ "$time_diff" -eq 1 ]] && smh="week" || smh="weeks"
+elif (( "$diff_s" >= 2629744 && "$diff_s" < 31556926 )); then
+    time_diff="$(round $diff_s 2629744)"
+    [[ "$time_diff" -eq 1 ]] && smh="month" || smh="months"
+elif (( "$diff_s" >= 31556926 )); then
+    time_diff="$(round $diff_s 31556926)"
+    [[ "$time_diff" -eq 1 ]] && smh="year" || smh="years"
+fi
+last_commit="About $time_diff $smh ago"
